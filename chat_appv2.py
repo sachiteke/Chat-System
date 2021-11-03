@@ -7,16 +7,22 @@ import pytz
 import getpass
 
 
+#Adjusts timezone to IST
 timez = pytz.timezone("Asia/Kolkata")
 curr = datetime.datetime.now(tz=timez)
 curr = curr.strftime("%d/%m/%Y %H:%M:%S")
 print(curr)
+
+#lists for keywords
 disconnect = ["exit", "quit", "disconnect"]
 tts = ["text to speech", "tts"]
+
+#file to store the chat history
 f1 = open("history.txt", "a")
 f1.write("\n["+curr+"]\n")
 
 
+#make a http request to google to find out current IP
 def getClientIP():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -26,6 +32,7 @@ def getClientIP():
     return IP
 
 
+#ask for the recipient's IP
 def getReciever(ReceiverIP):
     inp = input("Enter reciever IP: ")
     recIP = ReceiverIP
@@ -35,6 +42,7 @@ def getReciever(ReceiverIP):
     return recIP
 
 
+#this function toggle the status of the text-to-speech flag
 def tts_toggle():
     global tts_flag
     if tts_flag == 1:
@@ -43,12 +51,13 @@ def tts_toggle():
         tts_flag = 1
     return tts_flag
 
-
+#checking the value to text-to-speech flag
 def ttscheck():
     global tts_flag
     return tts_flag
 
 
+#this is where the actual text-to-speech happens
 def textts(input):
     eng = pyttsx3.init()
     eng.say(input)
@@ -56,6 +65,8 @@ def textts(input):
     return
 
 
+#this function uses Google's voice recognition api to detect voice
+#and change it to a string
 def speechToText():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -68,11 +79,13 @@ def speechToText():
         return msg
 
 
+
+#this function sends the message to all the IP addresses in RecieverIP
 def send(ReceiverIP, flag):
     while 1:
         r = ReceiverIP
         global tts_flag
-        if flag == 1:
+        if flag == 1:     #this flag is used to tell if the execution has to be stopped
             s.close()
             return
         msg = input()
@@ -85,7 +98,7 @@ def send(ReceiverIP, flag):
             continue
         if msg == "speak":
             msg = speechToText()
-        if "add address " in msg:
+        if "add address " in msg:  #adds another address in the RecieverIP list
             r.append(msg[12:])
             print(r)
             ReceiverIP = r
@@ -100,6 +113,7 @@ def send(ReceiverIP, flag):
             return
 
 
+#revieves messages from various senders
 def recieve(flag):
     while 1:
         t = ttscheck()
@@ -114,7 +128,7 @@ def recieve(flag):
             break
 
 
-counter = 0
+counter = 0. #to count number of login attempts
 try:
     while(counter < 3):
         file = open("psswrd.dat", "rb")
